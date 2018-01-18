@@ -1,0 +1,326 @@
+{% extends "base/base.html" %}
+
+{% block table_body %}
+    <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+            <h1 class="page-header"></h1>
+        </div>
+        <!-- /.col-lg-12 -->
+    </div>
+    <!-- /.row -->
+    <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    编辑工作
+                </div>
+                <!-- /.panel-heading -->
+                <div class="panel-body col-md-4">
+                    <label>项目名称</label>
+                    <input type="text" name="project_name" class="form-control" id="project_name" placeholder="请输入项目名称">
+                    <p id="project_name_error" style="color:red;"></p>
+                </div>
+                <br/><br/><br/><br/><br/><br/>
+                <div class="panel-body">
+                    <label>具体内容</label>
+                    <ul class="nav nav-tabs">
+                        <li class="active"><a href="#month" data-toggle="tab" aria-expanded="true">月度计划</a>
+                        </li>
+                        {% for k,v in weeks.items %}
+                        <li><a href="#{{ v }}_week" data-toggle="tab" aria-expanded="true">第{{ k }}周</a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    <div class="tab-content">
+                        <div class="tab-pane fade in active" id="month">
+                            <textarea id="month_job_content" style="width:1550px;height:500px;"></textarea>
+                        </div>
+                        {% for k,v in weeks.items %}
+                        <div class="tab-pane fade" id="{{ v }}_week">
+                            <textarea id="{{ v }}_week_job_content" style="width:1550px;height:500px;"></textarea>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <button type="submit" id="confirm_btn" class="btn btn-primary" onclick="edit_job_confirm()">确认</button>
+                    <button type="submit" id="cancel_btn" class="btn btn-default" onclick="edit_job_cancel()">取消</button>
+                    <button type="submit" id="key_task_btn" class="btn btn-success" onclick="add_key_task_confirm()">加入关键项目</button>
+                </div>
+                <!-- /.panel-body -->
+                <div id="comment_heading" class="panel-heading">
+                    <p>
+                        <span id="comment_label"><strong>评论区</strong></span>
+                        <button id="{{ target_username }}_{{ parent_id_id }}" class="btn btn-info" style="position:absolute;right:50px;" data-toggle="modal" data-target="#addCommentModal">
+                        <i class="fa fa-pencil"></i>我要评论
+                        </button>
+                    </p>
+                </div>
+                {% for c in comment_list %}
+                <div id="c_body_{{ forloop.counter0 }}" class="panel-body">
+                    <textarea id="comment_{{ forloop.counter0 }}" style="width:1550px;height:200px;"></textarea>
+                    <div class="panel-body">
+                    <p style="position:absolute;right:50px;">
+                        <span>{{ c.owner_username }}</span>
+                        <span>{{ c.created_time }}</span>
+                        {% if c.comment_editable == "True" %}
+                        <span>
+                        <a id="{{ c.id }}_{{ c.content }}" href="#" data-toggle="modal" data-target="#editCommentModal">编辑</a>
+                        </span>
+                        <span>
+                        <a id="{{ c.id }}" href="#" data-toggle="modal" data-target="#delCommentModal">删除</a>
+                        </span>
+                        {% endif %}
+                        <span>
+                        <a id="{{ c.id }}_{{ c.owner_username }}_{{ parent_id_id }}" href="#" data-toggle="modal" data-target="#addReplyModal">回复</a>
+                        </span>
+                    </p>
+                    </div>
+                    <!-- <div id="reply_heading" class="panel-heading">
+                    <p>
+                        <span id="reply_label"><strong>回复区</strong></span>
+                    </p>
+                    </div> -->
+                    {% for r in c.reply_list %}
+                    <div id="r_body_{{ forloop.parentloop.counter0 }}_{{ forloop.counter0 }}" class="panel-body">
+                        <textarea id="reply_{{ forloop.parentloop.counter0 }}_{{ forloop.counter0 }}" style="width:1530px;height:200px;"></textarea>
+                        <div class="panel-body">
+                        <p style="position:absolute;right:50px;">
+                            <span>{{ r.owner_username }}</span>
+                            <span>回复{{ r.target_username }}</span>
+                            <span>{{ r.created_time }}</span>
+                            {% if r.reply_editable == "True" %}
+                            <span>
+                            <a id="{{ r.id }}_{{ r.content }}" href="#" data-toggle="modal" data-target="#editReplyModal">编辑</a>
+                            </span>
+                            <span>
+                            <a id="{{ r.id }}" href="#" data-toggle="modal" data-target="#delReplyModal">删除</a>
+                            </span>
+                            {% endif %}
+                        </p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endfor %}
+            </div>
+            <!-- /.panel -->
+        </div>
+        <!-- /.col-lg-12 -->
+    </div>
+    {% include "modal/add_comment_modal.html" %}
+    {% include "modal/edit_comment_modal.html" %}
+    {% include "modal/del_comment_modal.html" %}
+    {% include "modal/add_reply_modal.html" %}
+    {% include "modal/edit_reply_modal.html" %}
+    {% include "modal/del_reply_modal.html" %}
+<!-- /#page-wrapper -->
+
+<script type="text/javascript">
+    var weeks = {{ weeks|safe }}
+    var editable = {{ editable|safe }}
+    var kindeditor_style = {{ kindeditor_style|safe }}
+    var comment_list = {{ comment_list|safe }}
+    var comment_list_len = comment_list.length
+    var comment_editor_list = []
+    var reply_editor_list = []
+    KindEditor.ready(function(K) {
+        month_editor = K.create("#month_job_content", kindeditor_style)
+        first_week_editor = K.create("#first_week_job_content", kindeditor_style)
+        second_week_editor = K.create("#second_week_job_content", kindeditor_style)
+        third_week_editor = K.create("#third_week_job_content", kindeditor_style)
+        forth_week_editor = K.create("#forth_week_job_content", kindeditor_style)
+        fifth_week_editor = K.create("#fifth_week_job_content", kindeditor_style)
+        sixth_week_editor = K.create("#sixth_week_job_content", kindeditor_style)
+        var m = 0
+        for (i in comment_list)
+        {
+            comment_editor_list[i] = K.create("#comment_" + i, {
+                'resizeType': 0,
+                'items': []
+            })
+            for (j in comment_list[i]["reply_list"])
+            {
+                reply_editor_list[m] = K.create("#reply_" + i + "_" + j, {
+                    'resizeType': 0,
+                    'items': []
+                })
+                m++
+            }
+        }
+    })
+    $(function(){
+        if (editable === 0)
+        {
+            $("#project_name").attr("readOnly",true)
+            $("#month_job_title").attr("readOnly",true)
+            document.getElementById("confirm_btn").style.display = "none"
+            document.getElementById("cancel_btn").style.display = "none"
+            document.getElementById("key_task_btn").style.display = "none"
+            month_editor.readonly(true)
+            first_week_editor.readonly(true)
+            second_week_editor.readonly(true)
+            third_week_editor.readonly(true)
+            forth_week_editor.readonly(true)
+            try {
+                fifth_week_editor.readonly(true)
+            } catch(e) {
+            }
+            try {
+                sixth_week_editor.readonly(true)
+            } catch(e) {
+            }
+            var m = 0
+            for (i in comment_list)
+            {
+                comment_editor_list[i].readonly(true)
+                for (j in comment_list[i]["reply_list"])
+                {
+                    reply_editor_list[m].readonly(true)
+                    m++
+                }
+            }
+        }
+        else
+        {
+            document.getElementById("comment_heading").style.display = "none"
+            for (i in comment_list)
+            {
+                document.getElementById("c_body_" + i).style.display = "none"
+                for (j in comment_list[i]["reply_list"])
+                {
+                    document.getElementById("r_body_" + i + "_" + j).style.display = "none"
+                }
+            }
+        }
+        var issuper = {{ issuper|safe }}
+        if (issuper === 0)
+        {
+            document.getElementById("key_task_btn").style.display = "none"
+        }
+        var project_name = '{{ project_name|safe }}'
+        var month_job_content = '{{ month_job_content|safe }}'
+        var first_week_job_content = '{{ first_week_job_content|safe }}'
+        var second_week_job_content = '{{ second_week_job_content|safe }}'
+        var third_week_job_content = '{{ third_week_job_content|safe }}'
+        var forth_week_job_content = '{{ forth_week_job_content|safe }}'
+        var fifth_week_job_content = '{{ fifth_week_job_content|safe }}'
+        var sixth_week_job_content = '{{ sixth_week_job_content|safe }}'
+        $('#project_name').val(project_name)
+        month_editor.html(month_job_content)
+        try {
+            first_week_editor.html(first_week_job_content)
+            second_week_editor.html(second_week_job_content)
+            third_week_editor.html(third_week_job_content)
+            forth_week_editor.html(forth_week_job_content)
+            fifth_week_editor.html(fifth_week_job_content)
+            sixth_week_editor.html(sixth_week_job_content)
+        } catch(e) {
+        }
+        var m = 0
+        for (i in comment_list)
+        {
+            comment_editor_list[i].html(comment_list[i]['content'])
+            for (j in comment_list[i]["reply_list"])
+            {
+                reply_editor_list[m].html(comment_list[i]["reply_list"][j]['content'])
+                m++
+            }
+        }
+    })
+    function edit_job_confirm() {
+        var edit_flag = '{{ edit_flag|safe }}'
+        var fifth_week_job_content_data = ""
+        var sixth_week_job_content_data = ""
+        try {
+            var fifth_week_job_content_data = fifth_week_editor.html()
+        } catch(e) {
+        }
+        try {
+            var sixth_week_job_content_data = sixth_week_editor.html()
+        } catch(e) {
+        }
+        var data = {
+            modal_name:"editMonthJob",
+            project_name:$('#project_name').val(),
+            month_job_content:month_editor.html(),
+            first_week_job_content:first_week_editor.html(),
+            second_week_job_content:second_week_editor.html(),
+            third_week_job_content:third_week_editor.html(),
+            forth_week_job_content:forth_week_editor.html(),
+            fifth_week_job_content:fifth_week_job_content_data,
+            sixth_week_job_content:sixth_week_job_content_data,
+            edit_flag:edit_flag
+        }
+        $.ajax({
+            type: "post",
+            // url: "update.do",
+            data: data,
+            dataType: 'json',
+            // contentType: "application/x-www-form-urlencoded; charset=utf-8",
+            success: function(data) {
+                if (data.status === 'fail') {
+                    document.getElementById('project_name_error').innerHTML = ""
+                    if (data.id === 'alert') {
+                        var d = dialog({
+                            title: '警告',
+                            content: '有其他用户正在更新数据，请刷新后重试！'
+                        })
+                        d.showModal()
+                    }
+                    else {
+                        document.getElementById(data.id).innerHTML = data.content
+                    }
+                }
+                else {
+                    location.href = '..' + data.content
+                }
+            }
+        });
+    }
+    function edit_job_cancel() {
+        location.href = '../month_job/?time={{ time }}'
+    }
+    function add_key_task_confirm() {
+        var fifth_week_key_task_job_data = ""
+        var sixth_week_key_task_job_data = ""
+        try {
+            var fifth_week_key_task_job_data = fifth_week_editor.selectedHtml()
+        } catch(e) {
+        }
+        try {
+            var sixth_week_key_task_job_data = sixth_week_editor.selectedHtml()
+        } catch(e) {
+        }
+        var data = {
+            modal_name:"addKeyTaskJob",
+            month_key_task_job:month_editor.selectedHtml(),
+            first_week_key_task_job:first_week_editor.selectedHtml(),
+            second_week_key_task_job:second_week_editor.selectedHtml(),
+            third_week_key_task_job:third_week_editor.selectedHtml(),
+            forth_week_key_task_job:forth_week_editor.selectedHtml(),
+            fifth_week_key_task_job:fifth_week_key_task_job_data,
+            sixth_week_key_task_job:sixth_week_key_task_job_data
+        }
+        $.ajax({
+            type: "post",
+            // url: "update.do",
+            data: data,
+            dataType: 'json',
+            // contentType: "application/x-www-form-urlencoded; charset=utf-8",
+            success: function(data) {
+                if (data.status === 'fail') {
+                    var d = dialog({
+                        title: '警告',
+                        content: '没有选择任何关键内容，请重新选择！'
+                    })
+                    d.showModal()
+                }
+                else {
+                    location.href = '..' + data.content
+                }
+            }
+        });
+    }
+</script>
+{% endblock %}

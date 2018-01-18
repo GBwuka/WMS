@@ -1,0 +1,104 @@
+{% extends "base/base.html" %}
+{% block left_tool_bar %}
+<div class="navbar-default sidebar" role="navigation">
+    <div class="sidebar-nav navbar-collapse">
+        <ul class="nav" id="side-menu">
+            <li>
+                <a href="#"><i class="fa fa-sitemap fa-fw"></i> 视图分类<span class="fa arrow"></span></a>
+                <ul class="nav nav-second-level">
+                    <li>
+                        <a href="?time=">所有数据</a>
+                    </li>
+                    <li>
+                        <a href="#">时间<span class="fa arrow"></span></a>
+                        <ul class="nav nav-third-level">
+                            {% for k in navbar_brand_data %}
+                            <li>
+                                <a href="#">{{ k.0 }}<span class="fa arrow"></span></a>
+                                <ul class="nav nav-forth-level">
+                                    {% for i in k.1 %}
+                                    <li>
+                                        <a href='?time={{ k.0 }}-{{ i }}'>{{ i }}月</a>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                </ul>
+                <!-- /.nav-second-level -->
+            </li>
+        </ul>
+    </div>
+    <!-- /.sidebar-collapse -->
+</div>
+<!-- /.navbar-static-side -->
+{% endblock %}
+
+{% block table_body %}
+<div id="page-wrapper">
+    <div class="row">
+        <div class="col-lg-12">
+            <h1 class="page-header">关键项目时间轴</h1>
+        </div>
+        <!-- /.col-lg-12 -->
+    </div>
+    <!-- /.row -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                </div>
+                <!-- /.panel-heading -->
+                <div class="panel-body">
+                    <ul class="timeline">
+                        {% for i in timeline_list %}
+                        {% if i.count %}
+                        <li>
+                            <div class="timeline-badge success"><i class="fa fa-check"></i>
+                            </div>
+                            <div class="timeline-panel">
+                                <p><h3 class="text-muted"><i class="fa fa-clock-o"></i>{{ i.time }}</h3>
+                                <!-- {{forloop.counter}} -->
+                                {% for j in i.content %}
+                                <div class="timeline-heading"> 
+                                    </p>
+                                    <h4 class="timeline-title">{{ j.project_name }}</h4>
+                                </div>
+                                <div class="timeline-body">
+                                    <a href="../edit_month_job/?id={{ j.id }}&editable=0" title="查看具体内容">{{ j.key_task }}</a>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </li>
+                        {% else %}
+                        <li class="timeline-inverted">
+                            <div class="timeline-badge success"><i class="fa fa-check"></i>
+                            </div>
+                            <div class="timeline-panel">
+                                <p><h3 class="text-muted"><i class="fa fa-clock-o"></i>{{ i.time }}</h3>
+                                <!-- {{forloop.counter}} -->
+                                {% for j in i.content %}
+                                <div class="timeline-heading"> 
+                                    </p>
+                                    <h4 class="timeline-title">{{ j.project_name }}</h4>
+                                </div>
+                                <div class="timeline-body">
+                                    <a href="../edit_month_job/?id={{ j.id }}&editable=0" title="查看具体内容">{{ j.key_task }}</a>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </li>
+                        {% endif %}
+                        {% endfor %}
+                    </ul>
+                </div>
+                <!-- /.panel-body -->
+            </div>
+            <!-- /.panel -->
+        </div>
+        <!-- /.col-lg-12 -->
+    </div>
+</div>
+{% endblock %}

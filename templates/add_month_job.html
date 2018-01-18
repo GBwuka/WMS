@@ -1,0 +1,74 @@
+{% extends "base/base.html" %}
+
+{% block table_body %}
+    <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+            <h1 class="page-header"></h1>
+        </div>
+        <!-- /.col-lg-12 -->
+    </div>
+    <!-- /.row -->
+    <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    创建计划
+                </div>
+                <!-- /.panel-heading -->
+                <div class="panel-body col-md-4">
+                    <label>项目名称</label>
+                    <input type="text" name="project_name" class="form-control" id="project_name" placeholder="请输入项目名称">
+                    <p id="project_name_error" style="color:red;"></p>
+                </div>
+                <br/><br/><br/><br/><br/><br/>
+                <div class="panel-body">
+                    <label>月度计划</label>
+                    <textarea id="content" style="width:1550px;height:500px;"></textarea>
+                </div>
+                <div class="panel-body">
+                    <button type="submit" class="btn btn-primary" onclick="add_job_confirm()">确认</button>
+                    <button type="submit" class="btn btn-default" onclick="add_job_cancel()">取消</button>
+                </div>
+                <!-- /.panel-body -->
+            </div>
+            <!-- /.panel -->
+        </div>
+        <!-- /.col-lg-12 -->
+    </div>
+<!-- /#page-wrapper -->
+<script type="text/javascript">
+    var kindeditor_style = {{ kindeditor_style|safe }}
+    KindEditor.ready(function(K) {
+        content_editor = K.create('#content', kindeditor_style)
+        // content_editor.readonly();
+    })
+    function add_job_confirm() {
+        // content_editor.html('HTML内容')
+        var data = {
+            modal_name:"addMonthJob",
+            project_name:$('#project_name').val(),
+            job_content:content_editor.html()
+        }
+        // console.log(content_editor.text())
+        $.ajax({
+            type: "post",
+            // url: "update.do",
+            data: data,
+            dataType: 'json',
+            // contentType: "application/x-www-form-urlencoded; charset=utf-8",
+            success: function(data) {
+                if (data.status === 'fail') {
+                    document.getElementById('project_name_error').innerHTML = ""
+                    document.getElementById(data.id).innerHTML = data.content
+                }
+                else {
+                    location.href = '..' + data.content
+                }
+            }
+        });
+    }
+    function add_job_cancel() {
+        location.href = '../month_job/?time={{ time }}'
+    }
+</script>
+{% endblock %}

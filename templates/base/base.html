@@ -1,0 +1,146 @@
+{% load staticfiles %}
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="">
+        <meta name="author" content="">
+
+        <title>WMS</title>
+        <!-- Bootstrap Core CSS -->
+        <link href="{% static 'css/bootstrap.css' %}" rel="stylesheet">
+        <!-- MetisMenu CSS -->
+        <link href="{% static 'css/metisMenu.min.css' %}" rel="stylesheet">
+        <!-- DataTables CSS -->
+        <link href="{% static 'css/dataTables.bootstrap.css' %}" rel="stylesheet">
+        <!-- DataTables Responsive CSS -->
+        <link href="{% static 'css/dataTables.responsive.css' %}" rel="stylesheet">
+        <!-- Custom CSS -->
+        <link href="{% static 'css/sb-admin-2.css' %}" rel="stylesheet">
+        <!-- Custom Fonts -->
+        <link href="{% static 'css/font-awesome.min.css' %}" rel="stylesheet">
+        <link href="{% static 'css/bootstrap-select.min.css' %}" rel="stylesheet">
+
+                <!-- jQuery -->
+        <script src="{% static 'js/jquery-3.2.1.min.js' %}"></script>
+
+        <!-- Bootstrap Core JavaScript -->
+        <script src="{% static 'js/bootstrap.min.js' %}"></script>
+
+        <!-- Metis Menu Plugin JavaScript -->
+        <script src="{% static 'js/metisMenu.js' %}"></script>
+
+        <!-- DataTables JavaScript -->
+        <script src="{% static 'js/jquery.dataTables.js' %}"></script>
+        <script src="{% static 'js/dataTables.bootstrap.js' %}"></script>
+        <script src="{% static 'js/dataTables.responsive.js' %}"></script>
+
+        <!-- Custom Theme JavaScript -->
+        <script src="{% static 'js/sb-admin-2.js' %}"></script>
+        <script src="{% static 'kindeditor/kindeditor-all.js' %}"></script>
+        <script src="{% static 'kindeditor/lang/zh-CN.js' %}"></script>
+        <script src="{% static 'js/bootstrap-select.js' %}"></script>
+        <script src="{% static 'js/dialog.js' %}"></script>
+      <!--   <script src="{% static 'js/i18n/defaults-*.min.js' %}"></script> -->
+    </head>
+    <body>
+        <div id="wrapper">
+            <!-- Navigation -->
+            <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
+                <div class="navbar-header">
+                    <a id = month_job_link class="navbar-brand" href="#">工作统计</a>
+                    <a class="navbar-brand" href="../todo_job/?status=">待跟进工作</a>
+                    <a class="navbar-brand" href="../pain_point/?status=">痛点</a>
+                    <a class="navbar-brand" href="../kpi/?time=">关键KPI</a>
+                </div>
+                <!-- /.navbar-header -->
+
+                <ul class="nav navbar-top-links navbar-right">
+                    <!-- /.dropdown -->
+                    <li class="dropdown">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                            <i class="fa fa-envelope fa-fw"></i>
+                            {% if comment_len %}
+                            <i>{{ comment_len }}</i>
+                            {% endif %}
+                        </a>
+                        <ul class="dropdown-menu dropdown-messages">
+                            {% for c in comment_list_read %}
+                            <li>
+                                <a href="{{ c.comment_url }}" onclick="update_comment_read({{ c.id }})">
+                                <div>
+                                    <strong>{{ c.owner_username }}</strong>
+                                    <span class="pull-right text-muted">
+                                        <em>{{ c.created_time }}</em>
+                                    </span>
+                                </div>
+                                <div>新的回复评论，请点击查看</div>
+                                </a>
+                            </li>
+                            {% endfor %}
+                            <li>
+                                <a class="text-center" href="../comment_list">
+                                    <strong>查看所有消息</strong>
+                                    <i class="fa fa-angle-right"></i>
+                                </a>
+                            </li>
+                        </ul>
+                        <!-- /.dropdown-user -->
+                    </li>
+                    <!-- /.dropdown -->
+                    <li class="dropdown">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                            <i class="fa fa-user fa-fw"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-user">
+                            <li><a href="#"><i class="fa fa-user fa-fw"></i>{{ username }}</a>
+                            </li>
+                            <li><a href="#" data-toggle="modal" data-target="#chgPassModal"><i class="fa fa-gear fa-fw"></i>修改密码</a>
+                            </li>
+                            <li class="divider"></li>
+                            <li><a href="../logout/"><i class="fa fa-sign-out fa-fw"></i> 退出</a>
+                            </li>
+                        </ul>
+                        <!-- /.dropdown-user -->
+                    </li>
+                    <!-- /.dropdown -->
+                </ul>
+                <!-- /.navbar-top-links -->
+                {% block left_tool_bar %}{% endblock %}
+            </nav>
+            {% block table_body %}{% endblock %}
+        </div>
+        <!-- /#wrapper -->
+        {% include "modal/change_password_modal.html" %}
+    </body>
+<script>
+    var myDate = new Date()
+    var year = myDate.getFullYear()
+    var month = myDate.getMonth() + 1
+    if (month === 10 || month === 11 || month === 12)
+    {
+        document.getElementById("month_job_link").href="../month_job/?time=" + year + "-" + month
+        // $('#month_job_link').attr("href", "../month_job/?time=" + year + "-" + month)
+    }
+    else
+    {
+        document.getElementById("month_job_link").href="../month_job/?time=" + year + "-0" + month
+        // $('#month_job_link').attr("href", "../month_job/?time=" + year + "-0" + month)
+    }
+    function update_comment_read(comment_id) {
+        var data = {
+            modal_name:"updateCommentRead",
+            comment_id:comment_id,
+        }
+        $.ajax({
+            type: "post",
+            data: data,
+            dataType: 'json',
+            success: function(data) {
+            }
+        })
+    }
+</script>
+</html>

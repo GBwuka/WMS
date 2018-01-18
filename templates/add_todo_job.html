@@ -1,0 +1,113 @@
+{% extends "base/base.html" %}
+
+{% block table_body %}
+    <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+            <h1 class="page-header"></h1>
+        </div>
+        <!-- /.col-lg-12 -->
+    </div>
+    <!-- /.row -->
+    <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    创建工作
+                </div>
+                <!-- /.panel-heading -->
+                <div class="panel-body col-md-4">
+                    <label>项目名称</label>
+                    <input type="text" name="project_name" class="form-control" id="project_name" placeholder="请输入项目名称">
+                    <p id="project_name_error" style="color:red;"></p>
+                </div>
+                </br></br></br></br></br></br>
+                <div class="panel-body">
+                    <label>标题</label>
+                    <input type="text" name="project_title" class="form-control" id="project_title" placeholder="请输入标题">
+                    <p id="project_title_error" style="color:red;"></p>
+                </div>
+                <div class="panel-body">
+                    <label>具体内容</label>
+                    <textarea id="project_content" style="width:1550px;height:500px;"></textarea>
+                </div>
+                <div class="panel-body col-md-2">
+                    <label>优先级</label>
+                    <select name="priority" class="form-control" id="priority">
+                        <option>Low</option>
+                        <option>Middle</option>
+                        <option>High</option>
+                    </select>
+                </div>
+                <div class="panel-body col-md-2">
+                    <label>截止日期</label>
+                    <input type="date" name="deadline_time" class="form-control" id="deadline_time"/>
+                </div>
+                <div class="panel-body col-md-2">
+                    <label>状态</label>
+                    <select name="status" class="form-control" id="status">
+                        <option>跟进中</option>
+                        <option>已完成</option>
+                    </select>
+                </div>
+                <div class="panel-body col-md-2">
+                    <label>工作类型</label>
+                    <select name="project_type" class="form-control" id="project_type">
+                        <option>公共类</option>
+                        <option>项目单独</option>
+                    </select>
+                </div>
+                <div class="panel-body col-md-4">
+                    <label>备注</label>
+                    <input type="text" name="remark" class="form-control" id="remark" placeholder="请输入备注">
+                </div>
+                <div class="panel-body">
+                    <button type="submit" class="btn btn-primary" onclick="add_todo_job_confirm()">确认</button>
+                    <button type="submit" class="btn btn-default" onclick="add_todo_job_cancel()">取消</button>
+                </div>
+                <!-- /.panel-body -->
+            </div>
+            <!-- /.panel -->
+        </div>
+        <!-- /.col-lg-12 -->
+    </div>
+<!-- /#page-wrapper -->
+<script type="text/javascript">
+    var kindeditor_style = {{ kindeditor_style|safe }}
+    KindEditor.ready(function(K) {
+        content_editor = K.create('#project_content', kindeditor_style)
+    })
+    function add_todo_job_confirm() {
+        var data = {
+            modal_name:"addTodoJob",
+            project_name:$('#project_name').val(),
+            project_title:$('#project_title').val(),
+            project_content:content_editor.html(),
+            priority:$('#priority').val(),
+            deadline_time:$('#deadline_time').val(),
+            status:$('#status').val(),
+            project_type:$('#project_type').val(),
+            remark:$('#remark').val()
+        }
+        $.ajax({
+            type: "post",
+            // url: "update.do",
+            data: data,
+            dataType: 'json',
+            // contentType: "application/x-www-form-urlencoded; charset=utf-8",
+            success: function(data) {
+                if (data.status === 'fail') {
+                    document.getElementById('project_name_error').innerHTML = ""
+                    document.getElementById('project_title_error').innerHTML = ""
+                    document.getElementById(data.id).innerHTML = data.content
+                }
+                else {
+                    location.href = '..' + data.content
+                }
+            }
+        });
+    }
+    function add_todo_job_cancel() {
+        location.href = '../todo_job/?status='
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,52 @@
+<div class="modal fade" id="addDefaultProjectModal" tabindex="-1" role="dialog" aria-labelledby="addDefaultProjectModalLabel" aria-hidden="true"
+    data-backdrop="static">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+          <h4 class="modal-title" id="addDefaultProjectModalLabel">添加默认项目</h4>
+        </div>
+          <div class="modal-body">
+            <form class="form-horizontal">
+              <div class="form-group">
+                <label for="add_default_project_name" class="col-sm-3 control-label">项目名称</label>
+                <div class="col-sm-8">
+                  <input type="text" name="add_default_project_name" class="form-control" id="add_default_project_name" placeholder="请输入项目名称"/>
+                  <p id="add_default_project_name_error" style="color:red;"></p>
+                </div>
+              </div>
+            </form>
+          </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+          <button type="button" class="btn btn-primary" onclick="add_default_project_confirm()">确认</button>
+        </div>
+    </div>
+  </div>
+</div>
+<script>
+    function add_default_project_confirm() {
+      //获取模态框数据
+      var add_default_project_name = $('#add_default_project_name').val();
+      var data = {
+          modal_name:"addDefaultProject",
+          add_default_project_name:add_default_project_name
+      }
+      $.ajax({
+          type: "post",
+          // url: "update.do",
+          data: data,
+          dataType: 'json',
+          // contentType: "application/x-www-form-urlencoded; charset=utf-8",
+          success: function(data) {
+              if (data.status === 'fail') {
+                  document.getElementById('add_default_project_name_error').innerHTML = ""
+                  document.getElementById(data.id).innerHTML = data.content
+              }
+              else {
+                  location.href = '..' + data.content
+              }
+          }
+      })
+    }
+</script>

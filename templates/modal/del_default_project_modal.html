@@ -1,0 +1,42 @@
+<div class="modal fade" id="delDefaultProjectModal" tabindex="-1" role="dialog" aria-labelledby="delDefaultProjectModalLabel" aria-hidden="true"
+    data-backdrop="static">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                <h4 class="modal-title" id="delDefaultProjectModalLabel">删除默认项目</h4>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="del_default_project_confirm()">确认</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var data_id = ""
+    $('#delDefaultProjectModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget) //获取当前触发事件的按钮
+        data_id = button[0].id
+    })
+    function del_default_project_confirm() {
+        var data = {
+            modal_name:"delDefaultProject",
+            data_id:data_id
+        }
+        $.ajax({
+            type: "post",
+            // url: "update.do",
+            data: data,
+            dataType: 'json',
+            // contentType: "application/x-www-form-urlencoded; charset=utf-8",
+            success: function(data) {
+                if (data.status === 'fail') {
+                }
+                else {
+                    location.href = '..' + data.content
+                }
+            }
+        });
+    }
+</script>

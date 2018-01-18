@@ -1,0 +1,96 @@
+{% extends "base/base.html" %}
+
+{% block table_body %}
+    <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+            <h1 class="page-header"></h1>
+        </div>
+        <!-- /.col-lg-12 -->
+    </div>
+    <!-- /.row -->
+    <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    编辑
+                </div>
+                <!-- /.panel-heading -->
+                <div class="panel-body">
+                    <label>标题</label>
+                    <input type="text" name="kpi_name" class="form-control" id="kpi_name" placeholder="请输入标题">
+                    <p id="kpi_name_error" style="color:red;"></p>
+                </div>
+                <div class="panel-body">
+                    <label>具体内容</label>
+                    <textarea id="kpi_content" style="width:1550px;height:500px;"></textarea>
+                </div>
+                <div class="panel-body">
+                    <button type="submit" id="confirm_btn" class="btn btn-primary" onclick="edit_kpi_confirm()">确认</button>
+                    <button type="submit" id="cancel_btn" class="btn btn-default" onclick="edit_kpi_cancel()">取消</button>
+                </div>
+                <!-- /.panel-body -->
+            </div>
+            <!-- /.panel -->
+        </div>
+        <!-- /.col-lg-12 -->
+    </div>
+<!-- /#page-wrapper -->
+<!-- ########################################################################################### -->
+<script type="text/javascript">
+    var editable = {{ editable|safe }}
+    var kindeditor_style = {{ kindeditor_style|safe }}
+    KindEditor.ready(function(K) {
+        content_editor = K.create("#kpi_content", kindeditor_style)
+    })
+    $(function(){
+        if (editable === 0)
+        {
+            $("#kpi_name").attr("readOnly",true)
+            document.getElementById("confirm_btn").style.display = "none"
+            document.getElementById("cancel_btn").style.display = "none"
+            content_editor.readonly()
+        }
+        var kpi_name = '{{ kpi_name|safe }}'
+        var kpi_content = '{{ kpi_content|safe }}'
+        $('#kpi_name').val(kpi_name)
+        content_editor.html(kpi_content)
+    })
+    function edit_kpi_confirm() {
+        var edit_flag = '{{ edit_flag|safe }}'
+        var data = {
+            modal_name:"editKPI",
+            kpi_name:$('#kpi_name').val(),
+            kpi_content:content_editor.html(),
+            edit_flag:edit_flag
+        }
+        $.ajax({
+            type: "post",
+            // url: "update.do",
+            data: data,
+            dataType: 'json',
+            // contentType: "application/x-www-form-urlencoded; charset=utf-8",
+            success: function(data) {
+                if (data.status === 'fail') {
+                    document.getElementById('kpi_name_error').innerHTML = ""
+                    if (data.id === 'alert') {
+                        var d = dialog({
+                            title: '警告',
+                            content: '有其他用户正在更新数据，请刷新后重试！'
+                        })
+                        d.showModal()
+                    }
+                    else {
+                        document.getElementById(data.id).innerHTML = data.content
+                    }
+                }
+                else {
+                    location.href = '..' + data.content
+                }
+            }
+        });
+    }
+    function edit_kpi_cancel() {
+        location.href = '../kpi/?time='
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,66 @@
+<div class="modal fade" id="editDefaultProjectModal" tabindex="-1" role="dialog" aria-labelledby="editDefaultProjectModalLabel" aria-hidden="true"
+    data-backdrop="static">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+          <h4 class="modal-title" id="editDefaultProjectModalLabel">修改默认项目</h4>
+        </div>
+          <div class="modal-body">
+            <form class="form-horizontal">
+              <div class="form-group">
+                <label for="edit_default_project_name" class="col-sm-3 control-label">项目名称</label>
+                <div class="col-sm-8">
+                  <input type="text" name="edit_default_project_name" class="form-control" id="edit_default_project_name" placeholder="请输入项目名称"/>
+                  <p id="edit_default_project_name_error" style="color:red;"></p>
+                </div>
+              </div>
+            </form>
+          </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+          <button type="button" class="btn btn-primary" onclick="edit_default_project_confirm()">确认</button>
+        </div>
+    </div>
+  </div>
+</div>
+<script>
+    var data_id = ""
+    $('#editDefaultProjectModal').on('show.bs.modal', function (event) {
+        $('#edit_default_project_name').val('')
+        document.getElementById('edit_default_project_name_error').innerHTML = ""
+        //获取表格中的一行数据
+        var button = $(event.relatedTarget) //获取当前触发事件的按钮
+        data_id = button[0].id
+        var row = button.parent().parent()[0].rowIndex
+        var edit_default_project_name = dataTables_dp.rows[row].cells[0].innerText
+        // 向模态框中传值
+        $('#edit_default_project_name').val(edit_default_project_name)
+        $(this).find("[name='edit_default_project_name']").val(edit_default_project_name)
+    })
+    function edit_default_project_confirm() {
+        //获取模态框数据
+        var edit_default_project_name = $('#edit_default_project_name').val();
+        var data = {
+            modal_name:"editDefaultProject",
+            data_id:data_id,
+            edit_default_project_name:edit_default_project_name
+        }
+        $.ajax({
+            type: "post",
+            // url: "update.do",
+            data: data,
+            dataType: 'json',
+            // contentType: "application/x-www-form-urlencoded; charset=utf-8",
+            success: function(data) {
+                if (data.status === 'fail') {
+                    document.getElementById('edit_default_project_name_error').innerHTML = ""
+                    document.getElementById(data.id).innerHTML = data.content
+                }
+                else {
+                    location.href = '..' + data.content
+                }
+            }
+        });
+    }
+</script>

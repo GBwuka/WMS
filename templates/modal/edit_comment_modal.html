@@ -1,0 +1,68 @@
+<div class="modal fade" id="editCommentModal" tabindex="-1" role="dialog" aria-labelledby="editCommentModalLabel" aria-hidden="true"
+    data-backdrop="static">
+    <div class="modal-dialog" role="document" style="width:680px">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                <h4 class="modal-title" id="editCommentModalLabel">评论</h4>
+            </div>
+            <div class="modal-body">
+                <textarea id="edit_comment_content" style="width:500px;height:500px;"></textarea>
+            </div>
+            <div class="modal-footer">
+                <p id="edit_comment_error" style="color:red;"></p>
+                <button type="button" class="btn btn-default" data-dismiss="modal" onclick="edit_comment_cancel()">取消</button>
+                <button type="button" class="btn btn-primary" onclick="edit_comment()">确认</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var data_id = ""
+    $('#editCommentModal').on('show.bs.modal', function (event) {
+        document.getElementById('edit_comment_error').innerHTML = ""
+        var button = $(event.relatedTarget) //获取当前触发事件的按钮
+        data_id = button[0].id
+        KindEditor.ready(function(K) {
+            edit_comment_editor = K.create('#edit_comment_content', {
+                'resizeType': 0,
+                'uploadJson': '/wms/upload/kindeditor',
+                'items': ['justifyleft', 'justifycenter', 'justifyright',
+                    'justifyfull', 'insertorderedlist', 'insertunorderedlist', '|', 
+                    'formatblock', 'fontname', 'fontsize', '|', 'forecolor', 'hilitecolor', 'bold',
+                    'italic', 'underline', '|', 'table', 'emoticons']
+            })
+        })
+        content = data_id.split("_")[1]
+        edit_comment_editor.html(content)
+    })
+    function edit_comment() {
+        //获取模态框数据
+        id = data_id.split("_")[0]
+        var data = {
+            modal_name:"editComment",
+            id:id,
+            content:edit_comment_editor.html(),
+            current_url:window.location.href
+        }
+        $.ajax({
+            type: "post",
+            // url: "update.do",
+            data: data,
+            dataType: 'json',
+            // contentType: "application/x-www-form-urlencoded; charset=utf-8",
+            success: function(data) {
+                if (data.status === 'fail') {
+                    document.getElementById('edit_comment_error').innerHTML = ""
+                    document.getElementById(data.id).innerHTML = data.content
+                }
+                else {
+                    location.href = '..' + data.content
+                }
+            }
+        })
+    }
+    function edit_comment_cancel() {
+        location.reload()
+    }
+</script>

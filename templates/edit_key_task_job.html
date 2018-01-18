@@ -1,0 +1,83 @@
+{% extends "base/base.html" %}
+
+{% block table_body %}
+    <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+            <h1 class="page-header"></h1>
+        </div>
+        <!-- /.col-lg-12 -->
+    </div>
+    <!-- /.row -->
+    <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    编辑关键内容
+                </div>
+                <!-- /.panel-heading -->
+                <div class="panel-body">
+                    <label>具体内容</label>
+                    <textarea id="key_task_content" style="width:1550px;height:500px;"></textarea>
+                </div>
+                <div class="panel-body">
+                    <button type="submit" id="confirm_btn" class="btn btn-primary" onclick="edit_key_task_job_confirm()">确认</button>
+                    <button type="submit" id="cancel_btn" class="btn btn-default" onclick="edit_key_task_job_cancel()">取消</button>
+                </div>
+                <!-- /.panel-body -->
+            </div>
+            <!-- /.panel -->
+        </div>
+        <!-- /.col-lg-12 -->
+    </div>
+<!-- /#page-wrapper -->
+
+<script type="text/javascript">
+    var editable = {{ editable|safe }}
+    var kindeditor_style = {{ kindeditor_style|safe }}
+    KindEditor.ready(function(K) {
+        key_task_editor = K.create("#key_task_content", kindeditor_style)
+    })
+    $(function(){
+        if (editable === 0)
+        {
+            document.getElementById("confirm_btn").style.display = "none"
+            document.getElementById("cancel_btn").style.display = "none"
+            key_task_editor.readonly()
+        }
+        var key_task_content = '{{ key_task_content|safe }}'
+        key_task_editor.html(key_task_content)
+    })
+    function edit_key_task_job_confirm() {
+        if (!key_task_editor.text())
+        {
+            key_task_html_content = ''
+        }
+        else
+        {
+            key_task_html_content = key_task_editor.html()
+        }
+        var data = {
+            modal_name:"editKeyTaskJob",
+            key_task_content:key_task_editor.text(),
+            key_task_html_content:key_task_html_content
+        }
+        $.ajax({
+            type: "post",
+            // url: "update.do",
+            data: data,
+            dataType: 'json',
+            // contentType: "application/x-www-form-urlencoded; charset=utf-8",
+            success: function(data) {
+                if (data.status === 'fail') {
+                }
+                else {
+                    location.href = '..' + data.content
+                }
+            }
+        });
+    }
+    function edit_key_task_job_cancel() {
+        location.href = '../month_job/?time={{ time }}'
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,70 @@
+<div class="modal fade" id="addReplyModal" tabindex="-1" role="dialog" aria-labelledby="addReplyModalLabel" aria-hidden="true"
+    data-backdrop="static">
+    <div class="modal-dialog" role="document" style="width:680px">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                <h4 class="modal-title" id="addReplyModalLabel">评论</h4>
+            </div>
+            <div class="modal-body">
+                <textarea id="add_reply_content" style="width:500px;height:500px;"></textarea>
+            </div>
+            <div class="modal-footer">
+                <p id="add_reply_error" style="color:red;"></p>
+                <button type="button" class="btn btn-default" data-dismiss="modal" onclick="add_reply_cancel()">取消</button>
+                <button type="button" class="btn btn-primary" onclick="add_reply()">确认</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var data_id = ""
+    $('#addReplyModal').on('show.bs.modal', function (event) {
+        document.getElementById('add_reply_error').innerHTML = ""
+        var button = $(event.relatedTarget) //获取当前触发事件的按钮
+        data_id = button[0].id
+        KindEditor.ready(function(K) {
+            add_content_editor = K.create('#add_reply_content', {
+                'resizeType': 0,
+                'uploadJson': '/wms/upload/kindeditor',
+                'items': ['justifyleft', 'justifycenter', 'justifyright',
+                    'justifyfull', 'insertorderedlist', 'insertunorderedlist', '|', 
+                    'formatblock', 'fontname', 'fontsize', '|', 'forecolor', 'hilitecolor', 'bold',
+                    'italic', 'underline', '|', 'table', 'emoticons']
+            })
+        })
+    })
+    function add_reply() {
+        //获取模态框数据
+        comment_id = data_id.split("_")[0]
+        target_username = data_id.split("_")[1]
+        parent_id_id = data_id.split("_")[2]
+        var data = {
+            modal_name:"addReply",
+            comment_id:comment_id,
+            target_username:target_username,
+            content:add_content_editor.html(),
+            parent_id_id:parent_id_id,
+            current_url:window.location.href
+        }
+        $.ajax({
+            type: "post",
+            // url: "update.do",
+            data: data,
+            dataType: 'json',
+            // contentType: "application/x-www-form-urlencoded; charset=utf-8",
+            success: function(data) {
+                if (data.status === 'fail') {
+                    document.getElementById('add_reply_error').innerHTML = ""
+                    document.getElementById(data.id).innerHTML = data.content
+                }
+                else {
+                    location.href = '..' + data.content
+                }
+            }
+        })
+    }
+    function add_reply_cancel() {
+        location.reload()
+    }
+</script>
