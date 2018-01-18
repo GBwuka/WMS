@@ -1,0 +1,3 @@
+*.js linguist-language=python-django
+*.css linguist-language=python-django
+*.html linguist-language=python-django
